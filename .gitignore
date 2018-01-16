@@ -6,3 +6,8 @@ target
 /.project
 /.settings
 /RUNNING_PID
+/public/node_modules
+*~
+#*
+*#
+public/package-lock.json
