@@ -7,8 +7,19 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.3"
 
-libraryDependencies += guice
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+lazy val macwireVersion = "2.3.0"
+
+lazy val taggingVersion = "1.0.0"
+
+// libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+
+libraryDependencies ++= Seq(
+  ehcache,
+  specs2                      % Test,
+  "com.softwaremill.macwire" %% "macros"                   % macwireVersion          % "provided",
+  "com.softwaremill.macwire" %% "util"                     % macwireVersion,
+  "com.softwaremill.common"  %% "tagging"                  % taggingVersion,
+)
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "meetsatori.com.controllers._"
