@@ -24,23 +24,31 @@ class AuritaAppLoader extends ApplicationLoader {
   }
 }
 
-class AppComponents(context: Context) extends BuiltInComponentsFromContext(context)
-  with AssetsComponents
-  with HttpFiltersComponents
-  with I18nComponents
-  with CSRFComponents
-  with SecurityHeadersComponents {
+trait BackendActorSystemTag
+trait MainActorSystemTag
+
+class AppComponents(context: Context)
+  extends BuiltInComponentsFromContext(context)
+    with AssetsComponents
+    with HttpFiltersComponents
+    with I18nComponents
+    with CSRFComponents
+    with SecurityHeadersComponents {
+  import com.softwaremill.tagging._
   import com.typesafe.config.ConfigFactory
   import play.api.Application
   import play.api.routing.Router
   import _root_.controllers.Assets
   import _root_.router.Routes
   import aurita.controllers.HomeController
+  import aurita.actors.{ SocketClientFactory, SocketClientFactoryImpl }
 
   lazy val prefix: String = "/"
   lazy val router: Router = wire[Routes]
 
   implicit val myApplication: Application = application
 
+  lazy val mainActorSystem = actorSystem.taggedWith[MainActorSystemTag]
+  lazy val socketClientFactory: SocketClientFactory = wire[SocketClientFactoryImpl]
   lazy val homeController: HomeController = wire[HomeController]
 }
