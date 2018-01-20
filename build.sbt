@@ -15,6 +15,7 @@ lazy val taggingVersion = "1.0.0"
 
 libraryDependencies ++= Seq(
   ehcache,
+  ws,
   specs2                      % Test,
   "com.softwaremill.macwire" %% "macros"                   % macwireVersion          % "provided",
   "com.softwaremill.macwire" %% "util"                     % macwireVersion,

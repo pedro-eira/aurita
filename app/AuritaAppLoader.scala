@@ -6,6 +6,7 @@ import play.api.{ ApplicationLoader, BuiltInComponentsFromContext }
 import play.api.i18n.I18nComponents
 import play.filters.csrf.CSRFComponents
 import play.filters.headers.SecurityHeadersComponents
+import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.ApplicationLoader.Context
 import play.filters.HttpFiltersComponents
 
@@ -30,6 +31,7 @@ trait MainActorSystemTag
 class AppComponents(context: Context)
   extends BuiltInComponentsFromContext(context)
     with AssetsComponents
+    with AhcWSComponents
     with HttpFiltersComponents
     with I18nComponents
     with CSRFComponents
