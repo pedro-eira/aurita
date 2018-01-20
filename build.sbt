@@ -1,5 +1,10 @@
 name := """aurita"""
 organization := "meetsatori.com"
+import sbt.complete._
+import sbt.complete._
+import com.typesafe.sbt.web.SbtWeb.autoImport._
+import play.sbt.PlayImport.PlayKeys.playRunHooks
+import scala.sys.process
 
 version := "1.0-SNAPSHOT"
 
@@ -39,3 +44,15 @@ libraryDependencies ++= Seq(
 
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "meetsatori.com.binders._"
+
+// Starts: Webpack build task
+val webpackBuild = taskKey[Unit]("Webpack build task.")
+webpackBuild := { process.Process("npm run build", file("./public")) ! }
+(packageBin in Universal) := ((packageBin in Universal) dependsOn webpackBuild).value
+// Ends.
+
+
+// Starts: Webpack server process when running locally and build actions for productionbundle
+lazy val frontendDirectory = baseDirectory {_ / "public"}
+playRunHooks += frontendDirectory.map(base => WebpackServer(base)).value
+// Ends.
