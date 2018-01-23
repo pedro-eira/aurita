@@ -3,6 +3,8 @@ package aurita
 import _root_.controllers.AssetsComponents
 import com.softwaremill.macwire.wire
 import play.api.{ ApplicationLoader, BuiltInComponentsFromContext }
+import play.api.db.slick.SlickComponents
+import play.api.db.slick.evolutions.SlickEvolutionsComponents
 import play.api.i18n.I18nComponents
 import play.filters.csrf.CSRFComponents
 import play.filters.headers.SecurityHeadersComponents
@@ -28,14 +30,13 @@ class AuritaAppLoader extends ApplicationLoader {
 trait BackendActorSystemTag
 trait MainActorSystemTag
 
-class AppComponents(context: Context)
-  extends BuiltInComponentsFromContext(context)
-    with AssetsComponents
-    with AhcWSComponents
-    with HttpFiltersComponents
-    with I18nComponents
-    with CSRFComponents
-    with SecurityHeadersComponents {
+class AppComponents(context: Context) extends AuritaSlickComponents(context)
+  with AssetsComponents
+  with AhcWSComponents
+  with HttpFiltersComponents
+  with I18nComponents
+  with CSRFComponents
+  with SecurityHeadersComponents {
   import com.softwaremill.tagging._
   import com.typesafe.config.ConfigFactory
   import play.api.Application
@@ -53,4 +54,32 @@ class AppComponents(context: Context)
   lazy val mainActorSystem = actorSystem.taggedWith[MainActorSystemTag]
   lazy val socketClientFactory: SocketClientFactory = wire[SocketClientFactoryImpl]
   lazy val homeController: HomeController = wire[HomeController]
+}
+
+abstract class AuritaSlickComponents(context: Context)
+  extends BuiltInComponentsFromContext(context)
+    with SlickComponents
+    with SlickEvolutionsComponents {
+  import play.api.db.slick.DbName
+  import slick.basic.DatabaseConfig
+  import slick.jdbc.JdbcProfile
+
+  lazy val dbName: DbName = DbName(
+    environment.mode match {
+      case play.api.Mode.Dev => "dev"
+      case play.api.Mode.Test => "test"
+      case play.api.Mode.Prod => "prod"
+    }
+  )
+
+  val dbConfig: DatabaseConfig[JdbcProfile] =
+    slickApi.dbConfig[JdbcProfile](dbName)
+
+  import play.api.db.evolutions._
+
+  if (environment.mode == play.api.Mode.Test) {
+    Evolutions.cleanupEvolutions(database = dbApi.database(dbName.value))
+  }
+
+  Evolutions.applyEvolutions(database = dbApi.database(dbName.value))
 }

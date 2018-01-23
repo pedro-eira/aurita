@@ -11,6 +11,8 @@ lazy val macwireVersion = "2.3.0"
 
 lazy val taggingVersion = "1.0.0"
 
+lazy val playSlickVersion = "3.0.3"
+
 // libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 
 libraryDependencies ++= Seq(
@@ -20,6 +22,8 @@ libraryDependencies ++= Seq(
   "com.softwaremill.macwire" %% "macros"                   % macwireVersion          % "provided",
   "com.softwaremill.macwire" %% "util"                     % macwireVersion,
   "com.softwaremill.common"  %% "tagging"                  % taggingVersion,
+  "com.typesafe.play"        %% "play-slick"               % playSlickVersion,
+  "com.typesafe.play"        %% "play-slick-evolutions"    % playSlickVersion
 )
 
 // Adds additional packages into Twirl
