@@ -1,0 +1,23 @@
+# --- !Ups
+
+CREATE TABLE CURRENT_STATUS (
+    ID                            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    ACTIVE                        BOOLEAN NOT NULL,
+    DESCRIPTION                   VARCHAR(254) NOT NULL,
+    STATUS_KEY                    VARCHAR(32) NOT NULL,
+    STATUS_VALUE                  VARCHAR(32) NOT NULL,
+    CREATED_TIME                  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    MODIFIED_TIME                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ON UPDATE                     CURRENT_TIMESTAMP,
+    CONSTRAINT                    CSTATUS_KEY_VALUE_UC
+      UNIQUE                        (STATUS_KEY, STATUS_VALUE),
+    PRIMARY KEY                   (ID)
+);
+
+# --- !Downs
+
+SET UNIQUE_CHECKS = 0;
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS CURRENT_STATUS;
+SET FOREIGN_KEY_CHECKS = 1;
+SET UNIQUE_CHECKS = 1;
