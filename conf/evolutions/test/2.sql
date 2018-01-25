@@ -1,0 +1,22 @@
+# --- !Ups
+
+CREATE TABLE USER_ROLE (
+    ID                            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    ACTIVE                        BOOLEAN NOT NULL,
+    DESCRIPTION                   VARCHAR(254) NOT NULL,
+    ROLE_NAME                     VARCHAR(32) NOT NULL,
+    SELECTABLE                    BOOLEAN NOT NULL,
+    CREATED_TIME                  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    MODIFIED_TIME                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT                    UROLE_NAME_UC
+      UNIQUE                        (ROLE_NAME),
+    PRIMARY KEY                   (ID)
+);
+
+# --- !Downs
+
+SET UNIQUE_CHECKS = 0;
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS USER_ROLE;
+SET FOREIGN_KEY_CHECKS = 1;
+SET UNIQUE_CHECKS = 1;
