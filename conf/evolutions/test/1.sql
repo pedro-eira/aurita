@@ -1,0 +1,21 @@
+# --- !Ups
+
+CREATE TABLE USER_GROUP (
+    ID                            BIGINT NOT NULL AUTO_INCREMENT,
+    ACTIVE                        BOOLEAN NOT NULL,
+    DESCRIPTION                   VARCHAR(254) NOT NULL,
+    GROUP_NAME                    VARCHAR(127) NOT NULL,
+    CREATED_TIME                  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    MODIFIED_TIME                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT                    UGROUP_NAME_UC
+      UNIQUE                        (GROUP_NAME),
+    PRIMARY KEY                   (ID)
+);
+
+# --- !Downs
+
+SET UNIQUE_CHECKS = 0;
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS USER_GROUP;
+SET FOREIGN_KEY_CHECKS = 1;
+SET UNIQUE_CHECKS = 1;
