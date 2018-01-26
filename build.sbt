@@ -10,8 +10,9 @@ lazy val macwireVersion = "2.3.0"
 lazy val taggingVersion = "1.0.0"
 lazy val playSlickVersion = "3.0.3"
 lazy val mysqlVersion = "8.0.8-dmr"
+lazy val playSilhouetteVersion = "5.0.3"
 
-// libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+resolvers += Resolver.jcenterRepo
 
 libraryDependencies ++= Seq(
   ehcache,
@@ -22,7 +23,12 @@ libraryDependencies ++= Seq(
   "com.softwaremill.common"  %% "tagging"                  % taggingVersion,
   "com.typesafe.play"        %% "play-slick"               % playSlickVersion,
   "com.typesafe.play"        %% "play-slick-evolutions"    % playSlickVersion,
-  "mysql"                     % "mysql-connector-java"     % mysqlVersion
+  "mysql"                     % "mysql-connector-java"     % mysqlVersion,
+  "com.mohiva" %% "play-silhouette"                        % playSilhouetteVersion,
+  "com.mohiva" %% "play-silhouette-persistence"            % playSilhouetteVersion,
+  "com.mohiva" %% "play-silhouette-password-bcrypt"        % playSilhouetteVersion,
+  "com.mohiva" %% "play-silhouette-crypto-jca"             % playSilhouetteVersion,
+  "com.mohiva"               %% "play-silhouette-testkit"  % playSilhouetteVersion % "test"
 )
 
 // Adds additional packages into Twirl
