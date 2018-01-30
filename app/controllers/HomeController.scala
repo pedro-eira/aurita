@@ -10,6 +10,7 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.mohiva.play.silhouette.api.Silhouette
 import scala.concurrent.ExecutionContext
+import controllers.Assets
 import aurita.MainActorSystemTag
 import aurita.actors.SocketClientFactory
 import aurita.utility.auth.DefaultEnv
@@ -19,6 +20,7 @@ import aurita.utility.auth.DefaultEnv
  * application's home page.
  */
 class HomeController(
+  assets: Assets,
   cc: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   socketClientFactory: SocketClientFactory,
@@ -41,7 +43,8 @@ class HomeController(
       }
     }
     // If Production, use build files.
-    case Mode.Prod => Assets.at("public/javascripts", file)
+    case Mode.Prod => assets.at("public/javascripts", file)
+    case Mode.Test => assets.at("public/javascripts", file)
   }
 
   /**
