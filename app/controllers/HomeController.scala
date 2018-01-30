@@ -3,13 +3,16 @@ package aurita.controllers
 import play.api.mvc.{
   AbstractController, Action, AnyContent, ControllerComponents, Request, WebSocket
 }
+import play.api.Environment
+import play.api.libs.ws.WSClient
 import com.softwaremill.tagging.@@
 import akka.actor.ActorSystem
 import akka.stream.Materializer
+import com.mohiva.play.silhouette.api.Silhouette
+import scala.concurrent.ExecutionContext
 import aurita.MainActorSystemTag
 import aurita.actors.SocketClientFactory
-import play.api.Environment
-import play.api.libs.ws.WSClient
+import aurita.utility.auth.DefaultEnv
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -17,17 +20,19 @@ import play.api.libs.ws.WSClient
  */
 class HomeController(
   cc: ControllerComponents,
+  silhouette: Silhouette[DefaultEnv],
   socketClientFactory: SocketClientFactory,
   system: ActorSystem @@ MainActorSystemTag,
   environment: Environment,
   ws: WSClient
-)(implicit val materializer: Materializer) extends AbstractController(cc) {
+)(
+  implicit val materializer: Materializer,
+  implicit val executionContext: ExecutionContext
+) extends AbstractController(cc) {
   import play.api.libs.streams.ActorFlow
-  import scala.concurrent.ExecutionContext
   import play.api.Mode
   import controllers.Assets
-
-  implicit val ec = ExecutionContext.Implicits.global
+  import scala.concurrent.Future
 
   def bundle(file:String) = environment.mode match {
     case Mode.Dev => Action.async {
@@ -46,8 +51,8 @@ class HomeController(
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index() = Action {
-    implicit request: Request[AnyContent] => Ok(views.html.index())
+  def index() = silhouette.UserAwareAction.async {
+    implicit request: Request[AnyContent] => Future { Ok(views.html.index()) }
   }
 
   /**
