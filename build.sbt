@@ -11,6 +11,7 @@ lazy val taggingVersion = "1.0.0"
 lazy val playSlickVersion = "3.0.3"
 lazy val mysqlVersion = "8.0.8-dmr"
 lazy val playSilhouetteVersion = "5.0.3"
+lazy val ficusVersion = "1.4.3"
 
 resolvers += Resolver.jcenterRepo
 
@@ -28,7 +29,8 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-persistence"            % playSilhouetteVersion,
   "com.mohiva" %% "play-silhouette-password-bcrypt"        % playSilhouetteVersion,
   "com.mohiva" %% "play-silhouette-crypto-jca"             % playSilhouetteVersion,
-  "com.mohiva"               %% "play-silhouette-testkit"  % playSilhouetteVersion % "test"
+  "com.mohiva"               %% "play-silhouette-testkit"  % playSilhouetteVersion % "test",
+  "com.iheart"               %% "ficus"                    % ficusVersion
 )
 
 // Adds additional packages into Twirl

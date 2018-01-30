@@ -11,6 +11,8 @@ import play.filters.headers.SecurityHeadersComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.ApplicationLoader.Context
 import play.filters.HttpFiltersComponents
+import play.api.cache.ehcache.EhCacheComponents
+import aurita.utility.auth.AuthenticationEnvironment
 
 class AuritaAppLoader extends ApplicationLoader {
   import play.api.LoggerConfigurator
@@ -31,6 +33,8 @@ trait BackendActorSystemTag
 trait MainActorSystemTag
 
 class AppComponents(context: Context) extends AuritaSlickComponents(context)
+  with AuthenticationEnvironment
+  with EhCacheComponents
   with AssetsComponents
   with AhcWSComponents
   with HttpFiltersComponents
@@ -41,10 +45,13 @@ class AppComponents(context: Context) extends AuritaSlickComponents(context)
   import com.typesafe.config.ConfigFactory
   import play.api.Application
   import play.api.routing.Router
+  import play.api.cache.AsyncCacheApi
   import _root_.controllers.Assets
   import _root_.router.Routes
   import aurita.controllers.HomeController
   import aurita.actors.{ SocketClientFactory, SocketClientFactoryImpl }
+
+  lazy val cacheApi: AsyncCacheApi = defaultCacheApi
 
   lazy val prefix: String = "/"
   lazy val router: Router = wire[Routes]
