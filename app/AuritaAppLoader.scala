@@ -50,6 +50,7 @@ class AppComponents(context: Context) extends AuritaSlickComponents(context)
   import _root_.router.Routes
   import aurita.controllers.HomeController
   import aurita.actors.{ SocketClientFactory, SocketClientFactoryImpl }
+  import aurita.controllers.auth.daos.{ AuthControllerDAO, AuthControllerDAOImpl }
 
   lazy val cacheApi: AsyncCacheApi = defaultCacheApi
 
@@ -60,6 +61,7 @@ class AppComponents(context: Context) extends AuritaSlickComponents(context)
 
   lazy val mainActorSystem = actorSystem.taggedWith[MainActorSystemTag]
   lazy val socketClientFactory: SocketClientFactory = wire[SocketClientFactoryImpl]
+  lazy val authControllerDAO: AuthControllerDAO = wire[AuthControllerDAOImpl]
   lazy val homeController: HomeController = wire[HomeController]
 }
 
