@@ -30,7 +30,7 @@ var config = {
   entry: {
     main : [
       'webpack-dev-server/client?https://localhost:8080',
-      APP_DIR + '/components/application/index.js'
+      APP_DIR + '/index.js'
     ]
   },
   output: {
@@ -41,17 +41,13 @@ var config = {
   },
   module : {
     loaders : [
-      {
-        test : /\.jsx?/,
-        include : APP_DIR,
-        loader : 'babel-loader'
+      { test : /\.jsx?/, include : APP_DIR, loader : 'babel-loader' },
+      { test: /\.json$/, loader: 'json-loader' },
+      { test: /\.css$/,
+        loader: 'style-loader!css-loader?modules=true&localIdentName=[name]__[local]___[hash:base64:5]'
       },
-      {test: /\.css$/,   loader: 'style-loader!css-loader?-minimize', exclude: /src/},
-      {test: /\.html$/,  loader: 'html-loader?caseSensitive=true'},
-      {
-        test: /\.(eot|svg|ttf|woff(2)?)(\?v=\d+\.\d+\.\d+)?/,
-        loader: 'url-loader'
-      }
+      { test: /\.html$/,  loader: 'html-loader?caseSensitive=true' },
+      { test: /\.(eot|svg|ttf|woff(2)?)(\?v=\d+\.\d+\.\d+)?/, loader: 'url-loader' }
     ]
   },
   plugins: [
