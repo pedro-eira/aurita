@@ -74,14 +74,14 @@ class SignUpController(
         username = data.username, email = data.email
       ) flatMap {
         isValid: Boolean => _processSubmitData(data = data, isValid = isValid)
-      } recover { case err => _processValidateEmailError(error = err) }
+      } recover { case err => _processSubmitEmailError(error = err) }
     )
   }
 
   private def _processSubmitData(
     data: SignUpData, isValid: Boolean
   )(implicit request: Request[_]): Future[Result] = {
-    logger.info(
+    logger.debug(
       s"User signing up: ${data.username}, ${data.email}, ${CredentialsProvider.ID}"
     )
     val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
@@ -147,7 +147,7 @@ class SignUpController(
     )) }
   }
 
-  private def _processValidateEmailError(error: Throwable): Result = error match {
+  private def _processSubmitError(error: Throwable): Result = error match {
     case e: DuplicateUsernameException => Conflict(Json.obj(
       "type" -> "username", "error" -> "Username already used", "mesg" -> ""
     ))
