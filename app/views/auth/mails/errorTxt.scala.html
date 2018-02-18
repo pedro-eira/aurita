@@ -1,0 +1,11 @@
+@(name: String, mesg: String)(implicit messages: Messages)
+@Messages("mail.error.hello", name)
+
+@Messages("mail.error.instructions")
+
+@mesg
+
+@Messages("mail.error.endInstructions")
+
+From,
+  The @Messages("application.name") team

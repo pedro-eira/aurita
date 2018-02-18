@@ -12,6 +12,7 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.ApplicationLoader.Context
 import play.filters.HttpFiltersComponents
 import play.api.cache.ehcache.EhCacheComponents
+import play.api.libs.mailer.MailerComponents
 import aurita.utility.auth.AuthenticationEnvironment
 
 class AuritaAppLoader extends ApplicationLoader {
@@ -33,6 +34,7 @@ trait BackendActorSystemTag
 trait MainActorSystemTag
 
 class AppComponents(context: Context) extends AuritaSlickComponents(context)
+  with MailerComponents
   with AuthenticationEnvironment
   with EhCacheComponents
   with AssetsComponents
@@ -42,15 +44,17 @@ class AppComponents(context: Context) extends AuritaSlickComponents(context)
   with CSRFComponents
   with SecurityHeadersComponents {
   import com.softwaremill.tagging._
-  import com.typesafe.config.ConfigFactory
-  import play.api.Application
+  import com.typesafe.config.Config
+  import play.api.{ Application, Configuration }
   import play.api.routing.Router
   import play.api.cache.AsyncCacheApi
   import _root_.controllers.Assets
   import _root_.router.Routes
   import aurita.controllers.HomeController
+  import aurita.controllers.auth.SignUpController
   import aurita.actors.{ SocketClientFactory, SocketClientFactoryImpl }
   import aurita.controllers.auth.daos.{ AuthControllerDAO, AuthControllerDAOImpl }
+  import aurita.utility.mail.{ Mailer, MailerImpl }
 
   lazy val cacheApi: AsyncCacheApi = defaultCacheApi
 
@@ -61,8 +65,11 @@ class AppComponents(context: Context) extends AuritaSlickComponents(context)
 
   lazy val mainActorSystem = actorSystem.taggedWith[MainActorSystemTag]
   lazy val socketClientFactory: SocketClientFactory = wire[SocketClientFactoryImpl]
+  implicit val myConfiguration: Configuration = configuration
   lazy val authControllerDAO: AuthControllerDAO = wire[AuthControllerDAOImpl]
   lazy val homeController: HomeController = wire[HomeController]
+  lazy val config: Config = myConfiguration.underlying
+  lazy val mailer: Mailer = wire[MailerImpl]
 }
 
 abstract class AuritaSlickComponents(context: Context)

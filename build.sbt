@@ -30,7 +30,8 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-password-bcrypt"        % playSilhouetteVersion,
   "com.mohiva" %% "play-silhouette-crypto-jca"             % playSilhouetteVersion,
   "com.mohiva"               %% "play-silhouette-testkit"  % playSilhouetteVersion % "test",
-  "com.iheart"               %% "ficus"                    % ficusVersion
+  "com.iheart"               %% "ficus"                    % ficusVersion,
+  "com.typesafe.play"        %% "play-mailer"              % "6.0.1"
 )
 
 // Adds additional packages into Twirl
