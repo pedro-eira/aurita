@@ -28,6 +28,13 @@ trait UserTokenDAO extends CRUD[UserToken] {
     */
   def insert(token: UserToken): Future[UserToken]
 
+   /** Insert or update a [[aurita.models.auth.UserToken user token]].
+    *
+    * @param token the token to upsert.
+    *
+    */
+  def upsert(token: UserToken): Future[UserToken]
+
    /** Get a user [[aurita.models.auth.auth.utility.ResetPasswordData reset password data]].
     *
     * @param userId the user id associated with the requested reset password data.
@@ -135,6 +142,15 @@ trait UserTokenDAOInterface extends DAOHelpers
       tableQuery returning tableQuery.map(_.id)
         into ((ans, id) => ans.copy(id = Option(id)))
     ) += token)
+
+    def upsert(token: UserToken): Future[UserToken] = db.run(
+      (tableQuery returning tableQuery.map(_.id)).insertOrUpdate(token)
+    ) map {
+      tokenOption => tokenOption match {
+        case None => token
+        case Some(id) => token.copy(id = Option(id))
+      }
+    }
 
     def findByUserId(userId: Long): Future[Option[UserToken]] =
       db.run(tableQuery.filter(t => t.userId === userId).result.headOption)
