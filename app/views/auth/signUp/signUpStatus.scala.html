@@ -1,0 +1,22 @@
+@(name: Option[String] = None, expired: Option[Boolean] = None, error: Option[String] = None)(
+  implicit request: RequestHeader, configuration: play.api.Configuration
+)
+
+@headerContent = {
+  @for(n <- name) {
+    <meta name="fullName" content="@n"/>
+  }
+  @for(ex <- expired) {
+    <meta name="expired" content="@ex"/>
+  }
+  @for(er <- error) {
+    <meta name="error" content="@er"/>
+  }
+}
+
+@main(
+  configuration.get[String]("titusi.appName") + " - Sign Up Success"
+)(
+  headerContent
+){
+}

@@ -68,6 +68,7 @@ class AppComponents(context: Context) extends AuritaSlickComponents(context)
   implicit val myConfiguration: Configuration = configuration
   lazy val authControllerDAO: AuthControllerDAO = wire[AuthControllerDAOImpl]
   lazy val homeController: HomeController = wire[HomeController]
+  lazy val signUpController: SignUpController = wire[SignUpController]
   lazy val config: Config = myConfiguration.underlying
   lazy val mailer: Mailer = wire[MailerImpl]
 }

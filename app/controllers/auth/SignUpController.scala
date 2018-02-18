@@ -4,13 +4,14 @@ import com.mohiva.play.silhouette.api.util.PasswordHasher
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
+import play.api.Configuration
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc.{ AbstractController, ControllerComponents }
 import aurita.utility.auth.DefaultEnv
+import aurita.utility.mail.Mailer
 import aurita.daos.auth.UserService
 import scala.concurrent.ExecutionContext
 import aurita.controllers.auth.daos.AuthControllerDAO
-
 
 /**
  * The `Sign Up` controller.
@@ -26,6 +27,7 @@ import aurita.controllers.auth.daos.AuthControllerDAO
  */
 class SignUpController(
   messagesApi: MessagesApi,
+  mailer: Mailer,
   cc: ControllerComponents,
   silhouette: Silhouette[DefaultEnv],
   userService: UserService,
@@ -34,13 +36,10 @@ class SignUpController(
   passwordHasher: PasswordHasher,
   controllerDAO: AuthControllerDAO
 )(
-  implicit executionContext: ExecutionContext
+  implicit executionContext: ExecutionContext, configuration: Configuration
 ) extends AbstractController(cc) with I18nSupport {
-  import play.api.mvc.{
-    Action, AnyContentAsMultipartFormData, Request, RequestHeader, Result
-  }
+  import play.api.mvc.{ Action, Request, RequestHeader, Result }
   import scala.concurrent.Future
-  import com.softwaremill.macwire.wire
   import java.util.UUID
   import play.api.libs.json.{ Json, JsValue }
   import com.mohiva.play.silhouette.api.{ LoginEvent, LoginInfo, SignUpEvent }
@@ -48,7 +47,7 @@ class SignUpController(
   import java.sql.Timestamp
   import org.joda.time.DateTime
   import aurita.controllers.auth.forms.SignUpForm.SignUpData
-  import aurita.models.auth.{ IdentityImpl, UserXGroup, UserReadable, UserToken }
+  import aurita.models.auth.{ IdentityImpl, User, UserXGroup, UserReadable, UserToken }
   import aurita.utility.strings.FormatString.formatString
   import aurita.daos.auth.UserDAO.{
     BadDomainNameException,
@@ -74,7 +73,7 @@ class SignUpController(
         username = data.username, email = data.email
       ) flatMap {
         isValid: Boolean => _processSubmitData(data = data, isValid = isValid)
-      } recover { case err => _processSubmitEmailError(error = err) }
+      } recover { case err => _processSubmitError(error = err) }
     )
   }
 
@@ -139,12 +138,148 @@ class SignUpController(
       )
     } yield (verifyToken, updatedPasswordInfo)
     f map {
-      case (token, _) => Ok(Json.obj("some" -> "yo"))
+      case (token, _) => {
+        mailer.welcome(
+          email = user.email,
+          name = user.fullName.getOrElse(user.username),
+          link = aurita.controllers.auth.routes.SignUpController.verifyToken(
+            token.tokenId
+          ).absoluteURL()
+        )
+        Ok(Json.obj("some" -> "yo"))
+      }
     } recover { case err => Conflict(Json.obj(
       "type" -> "email",
       "error" -> s"Unable to process sign up request. Please try again later: ${err}",
       "mesg" -> ""
     )) }
+  }
+
+  def verifyToken(tokenId: String) = Action.async { implicit request => {
+    controllerDAO.userTokenDAO.findByTokenId(tokenId).flatMap {
+      tokenOption: Option[UserToken] => tokenOption match {
+        case Some(token) => _processFoundToken(token = token)
+        case None => Future { Ok(
+          views.html.auth.signUp.signUpStatus(
+            error = Option("Invalid sign-up verification link.")
+          )
+        ) }
+      }
+    } recover { case err => Ok(views.html.auth.signUp.signUpStatus(
+      error = Option(
+        "Error processing sign-up verification link. Please contact support: ${err}"
+      )
+    )) }
+  } }
+
+  private def _processFoundToken(token: UserToken)(
+    implicit request: Request[_]
+  ): Future[Result] = {
+    controllerDAO.userDAO.findUserReadableById(id = token.userId).flatMap {
+      userOption: Option[UserReadable] => _processFoundUser(
+        userOption = userOption, token = token
+      )
+    } recover { case err => Ok(views.html.auth.signUp.signUpStatus(
+      error = Option(
+        s"""Failure finding user associated with sign-up verification
+          | link: ${err}""".tcombine,
+      )
+    )) }
+  }
+
+  private def _processFoundUser(userOption: Option[UserReadable], token: UserToken)(
+    implicit request: Request[_]
+  ): Future[Result] = userOption match {
+    case Some(user) if (
+      (user.statusValue == "emailNotConfirmed") && (!token.isExpired)
+    ) => _setEmailConfirmed(token = token, user = user)
+    case Some(user) if (user.statusValue == "emailConfirmed") => {
+      controllerDAO.userTokenDAO.deleteByTokenId(token.tokenId) flatMap {
+        _ => {
+          val name = user.fullName.getOrElse(user.username)
+          Future { Ok(views.html.auth.signUp.signUpStatus(
+            name = Some(name), expired = Some(false)
+          )) }
+        }
+      } recover { case err => {
+        logger.error(s"Error deleting token ${token}: ${err}")
+        val name = user.fullName.getOrElse(user.username)
+        Ok(views.html.auth.signUp.signUpStatus(
+          name = Some(name), expired = Some(false)
+        ))
+      } }
+    }
+    case Some(user) if (token.isExpired) => _processExpiredToken(
+      token = token, user = user
+    )
+    case None => Future {
+      Ok(views.html.auth.signUp.signUpStatus(
+        error = Option(
+          """Unable to find user associated with sign-up verification link.
+           | Please contact support.""".tcombine
+        )
+      ))
+    }
+  }
+
+  private def _processExpiredToken(token: UserToken, user: UserReadable)(
+    implicit request: Request[_]
+  ): Future[Result] = controllerDAO.userTokenDAO.upsert(
+    token.copy(tokenId = UUID.randomUUID().toString, expiresOn = _getNewExpiration)
+  ) flatMap {
+    newToken => {
+      val name = user.fullName.getOrElse(user.username)
+      mailer.welcome(
+        email = user.email,
+        name = name,
+        link = aurita.controllers.auth.routes.SignUpController.verifyToken(
+          tokenId = newToken.tokenId
+        ).absoluteURL()
+      )
+      Future { Ok(views.html.auth.signUp.signUpStatus(
+        name = Some(name), expired = Some(true)
+      )) }
+    } recover { case err => Ok(views.html.auth.signUp.signUpStatus(
+       error = Option(
+         s"""Expired sign-up verification link: Error renewing link.
+           | Please contact support: ${err}"""
+       )
+    )) }
+  }
+
+  private def _setEmailConfirmed(
+    token: UserToken, user: UserReadable
+  )(implicit request: RequestHeader): Future[Result] = {
+    controllerDAO.userDAO.updateStatus(
+      id = token.userId, statusValue = "emailConfirmed"
+    ) flatMap {
+      case _ => {
+        val loginInfo: LoginInfo = LoginInfo(CredentialsProvider.ID, user.email)
+        val identity: IdentityImpl = IdentityImpl(user = user, loginInfo = loginInfo)
+        silhouette.env.eventBus.publish(SignUpEvent(identity, request))
+        _deleteTokenAndRespond(tokenId = token.tokenId, user = user)
+      }
+    } recover { case err => Ok(views.html.auth.signUp.signUpStatus(
+      error = Option(
+        s"Error updating sign-up status. Please contact support: ${err}."
+      )
+    )) }
+  }
+
+  private def _deleteTokenAndRespond(
+    tokenId: String, user: UserReadable
+  )(implicit request: RequestHeader): Future[Result] = {
+    val name = user.fullName.getOrElse(user.username)
+    controllerDAO.userTokenDAO.deleteByTokenId(tokenId) flatMap {
+      _ => Future { Ok(views.html.auth.signUp.signUpStatus(
+        name = Some(name), expired = Some(false)
+      )) }
+    } recover { case err => {
+      logger.error(s"Error deleting token: ${tokenId} of user ${user}: ${err}")
+      Ok(views.html.auth.signUp.signUpStatus(
+        name = Some(name), expired = Some(false)
+      ))
+    } }
   }
 
   private def _processSubmitError(error: Throwable): Result = error match {
