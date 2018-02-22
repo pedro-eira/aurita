@@ -52,7 +52,7 @@ class AppComponents(context: Context) extends AuritaSlickComponents(context)
   import _root_.router.Routes
   import aurita.controllers.HomeController
   import aurita.controllers.auth.{
-    ForgotPasswordController, SignUpController
+    ForgotPasswordController, SignInController, SignUpController
   }
   import aurita.actors.{ SocketClientFactory, SocketClientFactoryImpl }
   import aurita.controllers.auth.daos.{ AuthControllerDAO, AuthControllerDAOImpl }
@@ -72,6 +72,7 @@ class AppComponents(context: Context) extends AuritaSlickComponents(context)
   lazy val homeController: HomeController = wire[HomeController]
   lazy val forgotPasswordController: ForgotPasswordController =
     wire[ForgotPasswordController]
+  lazy val signInController: SignInController = wire[SignInController]
   lazy val signUpController: SignUpController = wire[SignUpController]
   lazy val config: Config = configuration.underlying
   lazy val mailer: Mailer = wire[MailerImpl]
