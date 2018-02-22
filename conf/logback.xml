@@ -35,6 +35,7 @@
 
   <logger name="aurita.actors" level="DEBUG" />
   <logger name="aurita.daos" level="DEBUG" />
+  <logger name="aurita.controllers" level="DEBUG" />
 
   <root level="WARN">
     <!--<appender-ref ref="ASYNCFILE" />-->
