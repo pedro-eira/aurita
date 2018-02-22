@@ -62,7 +62,6 @@ class SignInController(
   def submit: Action[JsValue] = Action.async(parse.json) {
     implicit request  => request.body.validate[SignInData].fold(
       errors => Future {
-        logger.error(s"Invalid credentials: ${errors}")
         Unauthorized(Json.obj(
           "type" -> "other", "error" -> s"Invalid credentials: ${errors}", "mesg" -> ""
         ))
