@@ -101,7 +101,7 @@ class SignUpController(
 
   private def _getUserReadable(data: SignUpData): UserReadable = UserReadable(
     id = None,
-    groupName = data.email,
+    groupName = data.username,
     roleName = "user",
     statusValue = "emailNotConfirmed",
     userId = UUID.randomUUID.toString,
