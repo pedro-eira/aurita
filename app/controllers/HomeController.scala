@@ -54,9 +54,11 @@ class HomeController(
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index() = silhouette.UserAwareAction.async {
+  def index(pathname: String) = silhouette.UserAwareAction.async {
     implicit request: Request[AnyContent] => Future { Ok(views.html.index()) }
   }
+
+  def index0() = index(pathname = "")
 
   /**
    * Handle Websocket connection to the frontend user.
