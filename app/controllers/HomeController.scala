@@ -8,6 +8,8 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import aurita.MainActorSystemTag
 import aurita.actors.SocketClientFactory
+import play.api.Environment
+import play.api.libs.ws.WSClient
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -16,12 +18,26 @@ import aurita.actors.SocketClientFactory
 class HomeController(
   cc: ControllerComponents,
   socketClientFactory: SocketClientFactory,
-  system: ActorSystem @@ MainActorSystemTag
+  system: ActorSystem @@ MainActorSystemTag,
+  environment: Environment,
+  ws: WSClient
 )(implicit val materializer: Materializer) extends AbstractController(cc) {
   import play.api.libs.streams.ActorFlow
   import scala.concurrent.ExecutionContext
+  import play.api.Mode
+  import controllers.Assets
 
   implicit val ec = ExecutionContext.Implicits.global
+
+  def bundle(file:String) = environment.mode match {
+    case Mode.Dev => Action.async {
+      ws.url("http://localhost:8080/bundles/" + file).get().map{
+        response => Ok(response.body).as("text/javascript")
+      }
+    }
+    // If Production, use build files.
+    case Mode.Prod => Assets.at("public/javascripts", file)
+  }
 
   /**
    * Create an Action to render an HTML page.
