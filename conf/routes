@@ -14,6 +14,8 @@ GET  /app/signUp/verify/:tokenId    aurita.controllers.auth.SignUpController.ver
 
 POST /app/signIn                    aurita.controllers.auth.SignInController.submit
 
+POST /app/signUp                    aurita.controllers.auth.SignUpController.submit
+
 GET  /app/resetPassword/:userId/:tokenId  aurita.controllers.auth.ForgotPasswordController.resetPassword(tokenId: String, userId: Long)
 
 # Map static resources from the /public folder to the /assets URL path
