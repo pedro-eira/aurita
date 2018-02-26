@@ -4,9 +4,15 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           aurita.controllers.HomeController.index
+GET  /app/*pathname                 aurita.controllers.HomeController.index(pathname: String)
 
-GET     /app/signUp/verify/:tokenId    aurita.controllers.auth.SignUpController.verifyToken(tokenId: String)
+GET  /app                           aurita.controllers.HomeController.index0()
+
+GET  /app/                          aurita.controllers.HomeController.index0()
+
+GET  /app/signUp/verify/:tokenId    aurita.controllers.auth.SignUpController.verifyToken(tokenId: String)
+
+GET  /app/resetPassword/:userId/:tokenId  aurita.controllers.auth.ForgotPasswordController.resetPassword(tokenId: String, userId: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
