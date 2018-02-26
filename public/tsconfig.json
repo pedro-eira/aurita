@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "outDir": "bundles",
+    "sourceMap": true,
+    "module": "esnext",
+    "target": "es5",
+    "jsx": "react",
+    "lib": ["es6", "dom"],
+    "sourceMap": true,
+    // "allowJs": true,
+    "moduleResolution": "node",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {"*": ["node_modules/*"]},
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noUnusedLocals": true  
+  },
+  "include": [
+    "./src/**/*"
+  ],
+}
