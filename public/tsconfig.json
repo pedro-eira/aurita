@@ -11,7 +11,9 @@
     "moduleResolution": "node",
     "rootDir": "./src",
     "baseUrl": ".",
-    "paths": {"*": ["node_modules/*"]},
+    "paths": {
+      "*": ["node_modules/*", "src/*"]
+    },
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
