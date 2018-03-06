@@ -60,6 +60,12 @@ class HomeController(
 
   def index0() = index(pathname = "")
 
+  def index1() = silhouette.UserAwareAction.async {
+    implicit request: Request[AnyContent] => Future {
+      Redirect(aurita.controllers.routes.HomeController.index0)
+    }
+  }
+
   /**
    * Handle Websocket connection to the frontend user.
    *

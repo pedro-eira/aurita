@@ -6,9 +6,11 @@
 # An example controller showing a sample home page
 GET  /app/*pathname                 aurita.controllers.HomeController.index(pathname: String)
 
+GET  /                              aurita.controllers.HomeController.index1()
+
 GET  /app                           aurita.controllers.HomeController.index0()
 
-GET  /app/                          aurita.controllers.HomeController.index0()
+GET  /app/                          aurita.controllers.HomeController.index1()
 
 GET  /app/signUp/verify/:tokenId    aurita.controllers.auth.SignUpController.verifyToken(tokenId: String)
 
