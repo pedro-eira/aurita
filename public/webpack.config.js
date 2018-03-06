@@ -1,12 +1,14 @@
-var webpack = require('webpack');
-var path = require('path');
+var webpack                    = require('webpack');
+var path                       = require('path');
+const TsconfigPathsPlugin      = require('tsconfig-paths-webpack-plugin');
 const CommonsChunkPlugin       = require('webpack/lib/optimize/CommonsChunkPlugin');
 const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
 const CopyWebpackPlugin        = require('copy-webpack-plugin');
 const DefinePlugin             = require('webpack/lib/DefinePlugin');
 
-var BUILD_DIR = path.resolve(__dirname, 'javascripts');
-var APP_DIR = path.resolve(__dirname, './src');
+var BUILD_DIR      = path.resolve(__dirname, 'javascripts');
+var APP_DIR        = path.resolve(__dirname, './src');
+const tsConfigJson = require('./tsconfig.json');
 
 const ENV  = process.env.NODE_ENV = 'development';
 const HOST = process.env.HOST || 'localhost';
@@ -61,7 +63,7 @@ var config = {
       },	  
       // All files with a '.ts' or '.tsx' extension will be handled by
       // 'awesome-typescript-loader'.
-      { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+      { test: /\.tsx?$/, loader: "ts-loader", exclude: /node_modules/ },
       // All output '.js' files will have any sourcemaps re-processed
       // by 'source-map-loader'.
       { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
@@ -80,12 +82,13 @@ var config = {
   ],
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"],
-    alias: {
-      app: APP_DIR
-    },
-    modules: [
-      path.join(__dirname, "node_modules")
-    ]
+    plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })],
+//    alias: {
+//      app: APP_DIR
+//    },
+//    modules: [
+//      path.join(__dirname, "node_modules")
+      //    ],
   },
   // When importing a module whose path matches one of the following,
   // just assume a corresponding global variable exists and use that
